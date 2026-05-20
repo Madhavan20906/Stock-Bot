@@ -1,0 +1,39 @@
+data:
+  raw_path: data/raw
+  processed_path: data/processed
+  sequence_length: 60
+  train_end: "2018-12-31"
+  val_end: "2019-12-31"
+
+features:
+  technical:
+    rsi_period: 14
+    macd_fast: 12
+    macd_slow: 26
+    macd_signal: 9
+    bb_period: 20
+    bb_std: 2.0
+    atr_period: 14
+
+lstm:
+  input_size: 32
+  hidden_size: 128
+  num_layers: 3
+  dropout: 0.2
+  use_attention: true
+  output_steps: 5
+
+training:
+  epochs: 100
+  batch_size: 64
+  learning_rate: 0.001
+  weight_decay: 1.0e-5
+  scheduler: cosine
+  early_stopping_patience: 15
+  gradient_clip: 1.0
+  checkpoint_dir: checkpoints/lstm/
+
+logging:
+  level: INFO
+  mlflow_tracking_uri: mlruns/
+  experiment_name: stockbot_lstm

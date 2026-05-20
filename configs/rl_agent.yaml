@@ -1,0 +1,42 @@
+agent:
+  algorithm: PPO
+  batch_size: 64
+  clip_range: 0.2
+  ent_coef: 0.01
+  gae_lambda: 0.95
+  gamma: 0.99
+  learning_rate: 0.0003
+  n_epochs: 10
+  n_steps: 2048
+  policy: MlpPolicy
+  verbose: 1
+data:
+  raw_path: data/raw
+  sequence_length: 60
+  train_end: '2018-12-31'
+  val_end: '2019-12-31'
+environment:
+  initial_balance: 100000
+  max_position_size: 0.2
+  reward_scaling: 0.0001
+  transaction_cost: 0.001
+  window_size: 30
+features:
+  technical:
+    atr_period: 14
+    bb_period: 20
+    bb_std: 2.0
+    macd_fast: 12
+    macd_signal: 9
+    macd_slow: 26
+    rsi_period: 14
+logging:
+  experiment_name: stockbot_rl
+  level: INFO
+  mlflow_tracking_uri: mlruns/
+training:
+  checkpoint_dir: checkpoints/rl/
+  eval_freq: 10000
+  n_eval_episodes: 3
+  tensorboard_log: null
+  total_timesteps: 100000

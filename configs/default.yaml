@@ -1,0 +1,50 @@
+project:
+  name: stockbot
+  version: "1.0.0"
+  seed: 42
+
+data:
+  raw_path: data/raw
+  processed_path: data/processed
+  feature_store_path: data/processed/features.parquet
+  tickers:                      # Subset for quick experiments
+    - AAPL
+    - MSFT
+    - GOOGL
+    - AMZN
+    - TSLA
+    - JPM
+    - GS
+    - SPY
+  train_start: "2015-01-01"
+  train_end: "2021-12-31"
+  val_start: "2022-01-01"
+  val_end: "2022-12-31"
+  test_start: "2023-01-01"
+  test_end: "2023-12-31"
+  sequence_length: 60            # Lookback window (days) for LSTM
+
+features:
+  technical:
+    rsi_period: 14
+    macd_fast: 12
+    macd_slow: 26
+    macd_signal: 9
+    bb_period: 20
+    bb_std: 2.0
+    atr_period: 14
+  sentiment:
+    aggregation_window: 1        # days to aggregate news sentiment
+    decay_factor: 0.8
+
+signals:
+  lstm_weight: 0.4
+  rl_weight: 0.4
+  sentiment_weight: 0.2
+  buy_threshold: 0.6
+  sell_threshold: 0.4
+
+logging:
+  level: INFO
+  mlflow_tracking_uri: mlruns/
+  experiment_name: stockbot_v1

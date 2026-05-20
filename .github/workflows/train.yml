@@ -1,0 +1,125 @@
+name: Train Models
+
+on:
+  workflow_dispatch:
+    inputs:
+      ticker:
+        description: "Ticker to train on"
+        required: true
+        default: "AAPL"
+      config:
+        description: "Config file"
+        required: false
+        default: "configs/default.yaml"
+      skip_rl:
+        description: "Skip RL training (faster)"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "configs/**"
+
+jobs:
+  train-lstm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Download dataset
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: python scripts/download_data.py
+
+      - name: Train LSTM
+        run: |
+          python src/models/lstm/train.py \
+            --config configs/lstm.yaml \
+            --ticker ${{ github.event.inputs.ticker || 'AAPL' }}
+
+      - name: Upload LSTM checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: lstm-checkpoint-${{ github.event.inputs.ticker || 'AAPL' }}
+          path: checkpoints/lstm/
+
+  train-rl:
+    runs-on: ubuntu-latest
+    needs: train-lstm
+    if: ${{ github.event.inputs.skip_rl != 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Download dataset
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: python scripts/download_data.py
+
+      - name: Train RL Agent
+        run: |
+          python src/models/rl_agent/train.py \
+            --config configs/rl_agent.yaml \
+            --ticker ${{ github.event.inputs.ticker || 'AAPL' }}
+
+      - name: Upload RL checkpoint
+        uses: actions/upload-artifact@v4
+        with:
+          name: rl-checkpoint-${{ github.event.inputs.ticker || 'AAPL' }}
+          path: checkpoints/rl/
+
+  backtest:
+    runs-on: ubuntu-latest
+    needs: [train-lstm, train-rl]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Download LSTM checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: lstm-checkpoint-${{ github.event.inputs.ticker || 'AAPL' }}
+          path: checkpoints/lstm/
+
+      - name: Run backtest
+        run: python src/backtesting/engine.py --config ${{ github.event.inputs.config || 'configs/default.yaml' }}
+
+      - name: Upload backtest results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-results
+          path: logs/backtest_*.json

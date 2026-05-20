@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data — keep structure, ignore actual files
+data/raw/*
+data/processed/*
+data/external/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/external/.gitkeep
+
+# ML artifacts
+models/saved/
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+*.onnx
+checkpoints/
+
+# Experiment tracking
+mlruns/
+mlartifacts/
+wandb/
+optuna_studies/
+
+# Logs
+logs/*.log
+logs/*.jsonl
+!logs/.gitkeep
+
+# Secrets & env
+.env
+*.key
+secrets/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Redis dump
+dump.rdb

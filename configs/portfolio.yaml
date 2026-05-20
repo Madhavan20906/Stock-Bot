@@ -1,0 +1,20 @@
+defaults:
+  - default
+
+optimization:
+  method: max_sharpe             # max_sharpe | min_volatility | efficient_risk
+  risk_free_rate: 0.05           # Annual risk-free rate
+  weight_bounds:
+    min: 0.0
+    max: 0.25                    # Max 25% in any single asset
+  rebalance_frequency: weekly    # daily | weekly | monthly
+
+risk:
+  max_portfolio_var: 0.02        # Daily VaR at 95% confidence
+  max_drawdown_limit: 0.15       # Stop trading if drawdown exceeds 15%
+  position_sizing: kelly          # kelly | fixed | volatility_parity
+
+constraints:
+  min_tickers: 5
+  max_tickers: 20
+  sector_cap: 0.4                # Max 40% in any sector
