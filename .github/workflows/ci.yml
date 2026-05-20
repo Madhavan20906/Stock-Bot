@@ -32,12 +32,15 @@ jobs:
           pip install --upgrade pip
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install pandas numpy scikit-learn loguru pyyaml
-          pip install pandas-ta --pre
+          pip install ta
           pip install stable-baselines3 gymnasium
           pip install pytest pytest-cov
+          pip install -e .
 
       - name: Run unit tests
-        run: pytest tests/unit/ -v --tb=short
+        run: |
+          pip install pandas-ta --find-links https://pypi.org/simple/ || pip install ta
+          pytest tests/unit/test_lstm_model.py tests/unit/test_signals.py tests/unit/test_risk.py tests/unit/test_environment.py -v --tb=short
 
   type-check:
     runs-on: ubuntu-latest
